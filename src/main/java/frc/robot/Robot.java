@@ -90,13 +90,13 @@ public class Robot extends TimedRobot {
 		m_motor1.config_kD(Constants.kPIDLoopIdx, kD, Constants.kTimeoutMs);
 	
 		// Convert RPM to raw units per 100ms
-		double targetVelocity_UnitsPer100ms = velocity;// * 2048 / 600;
+		double targetVelocity_UnitsPer100ms = velocity * 2048 / 600;
 		
 		// Set m_Velocity setpoint
 		m_motor1.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
 		
 		// Get current speed and convert back to RPM
-		int speed = m_motor1.getSelectedSensorVelocity();// * 600 / 2048;
+		int speed = m_motor1.getSelectedSensorVelocity() * 600 / 2048;
 		SmartDashboard.putNumber("Current Velocity", speed);
 
 		// Show the current m_Error on the SDB
