@@ -10,7 +10,7 @@
  * as well as the FRC roboRIO when in use in FRC Competition.
  * 
  * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
- * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ * WARRANTY OF ANY m_KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
  * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
  * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
  * CROSS THE ROAD ELECTRONICS BE LIABLE FOR ANY INCIDENTAL, SPECIAL, 
@@ -24,27 +24,6 @@
 
 /**
  * Description:
- * The VelocityClosedLoop example demonstrates the velocity closed-loop servo.
- * Tested with Logitech F350 USB Gamepad inserted into Driver Station]
- * 
- * Be sure to select the correct feedback sensor using configSelectedFeedbackSensor() below.
- * Use Percent Output Mode (Holding A and using Left Joystick) to confirm talon is driving 
- * forward (Green LED on Talon/Victor) when the postion sensor is moving in the postive 
- * direction. If this is not the case, flip the boolean input in setSensorPhase().
- * 
- * Controls:
- * Button 1: When held, start and run Velocity Closed Loop on Talon/Victor
- * Left Joystick Y-Axis:
- * 	+ Percent Output: Throttle Talon forward and reverse, use to confirm hardware setup
- * 	+ Velocity Closed Loop: Servo Talon forward and reverse [-500, 500] RPM
- * 
- * Gains for Velocity Closed Loop may need to be adjusted in Constants.java
- * 
- * Supported Version:
- * - Talon SRX: 4.00
- * - Victor SPX: 4.00
- * - Pigeon IMU: 4.00
- * - CANifier: 4.00
  */
 package frc.robot;
 
@@ -55,75 +34,72 @@ import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.motorcontrol.*;
 
 public class Robot extends TimedRobot {
-    /* Hardware */
-	TalonFX motor1 = new TalonFX(1);
+
+	/* Hardware */
+	TalonFX m_motor1 = new TalonFX(1);
     
-    /* String for output */
-    
-    /* Loop tracker for prints */
-	private double kP = 0.0, kI  = 0.0, kD = 0.0, kF = 0.0;
-	private int velocity = 0, error = 0;
+    /* Initialize gains */
+	private double m_kP = 0.25, m_kI  = 0.0, m_kD = 0.0, m_kF = 0.045;
 
 	public void robotInit() {
-		SmartDashboard.putNumber("Velocity", velocity);
-		SmartDashboard.putNumber("P", kP);
-		SmartDashboard.putNumber("I", kI);
-		SmartDashboard.putNumber("D", kD);
-		SmartDashboard.putNumber("Feed Forward", kF);
-		SmartDashboard.putNumber("Error", error);
+
+		/* Initialize Smart Dashboard display */
+		SmartDashboard.putNumber("Velocity", 0);
+		SmartDashboard.putNumber("P", m_kP);
+		SmartDashboard.putNumber("I", m_kI);
+		SmartDashboard.putNumber("D", m_kD);
+		SmartDashboard.putNumber("Feed Forward", m_kF);
+		SmartDashboard.putNumber("Error", 0);
 
         /* Factory Default all hardware to prevent unexpected behaviour */
-      	motor1.configFactoryDefault();
+      	m_motor1.configFactoryDefault();
 
-		/* Config sensor used for Primary PID [Velocity] */
-        motor1.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor,
+		/* Config sensor used for Primary PID [m_Velocity] */
+        m_motor1.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor,
                                             Constants.kPIDLoopIdx, 
                                             Constants.kTimeoutMs);
 
         /**
 		 * Phase sensor accordingly. 
-         * Positive Sensor Reading should match Green (blinking) Leds on Talon
+         * Positive Sensor Reading should match Green (blinm_king) Leds on Talon
          */
-		motor1.setSensorPhase(false);
+		m_motor1.setSensorPhase(false);
 
 		/* Config the peak and nominal outputs */
-		motor1.configNominalOutputForward(0.0, Constants.kTimeoutMs);
-		motor1.configNominalOutputReverse(0.0, Constants.kTimeoutMs);
-		motor1.configPeakOutputForward(1, Constants.kTimeoutMs);
-		motor1.configPeakOutputReverse(0.0, Constants.kTimeoutMs); // Don't go in reverse
-
-
-		/* Config the Velocity closed loop gains in slot0 */
-
+		m_motor1.configNominalOutputForward(0.0, Constants.kTimeoutMs);
+		m_motor1.configNominalOutputReverse(0.0, Constants.kTimeoutMs);
+		m_motor1.configPeakOutputForward(1, Constants.kTimeoutMs);
+		m_motor1.configPeakOutputReverse(0.0, Constants.kTimeoutMs); // Don't go in reverse
 	}
 
 	/**
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
-		double m_velocity = SmartDashboard.getNumber("Velocity", 0); // Get desired velocity in RPM
-		double m_kP = SmartDashboard.getNumber("P", 0.25);
-		double m_kI = SmartDashboard.getNumber("I",  0.001);
-		double m_kD = SmartDashboard.getNumber("D", 20);
-		double m_kF = SmartDashboard.getNumber("Feed Forward",  1023.0/7200.0);
 
-		//System.out.println("velocity " + m_velocity);
+		/* Config the m_Velocity closed loop gains in slot0 */
+		double velocity = SmartDashboard.getNumber("Velocity", 0); // Get desired m_velocity in RPM
+		double kP = SmartDashboard.getNumber("P", 0.25);
+		double kI = SmartDashboard.getNumber("I",  0.00);
+		double kD = SmartDashboard.getNumber("D", 0.0);
+		double kF = SmartDashboard.getNumber("Feed Forward",  0.045);
 
-		motor1.config_kF(Constants.kPIDLoopIdx, m_kF, Constants.kTimeoutMs);
-		motor1.config_kP(Constants.kPIDLoopIdx, m_kP, Constants.kTimeoutMs);
-		motor1.config_kI(Constants.kPIDLoopIdx, m_kI, Constants.kTimeoutMs);
-		motor1.config_kD(Constants.kPIDLoopIdx, m_kD, Constants.kTimeoutMs);
-		/* Get Talon/Victor's current output percentage */		
-		/* Prepare line to print */
-
+		m_motor1.config_kF(Constants.kPIDLoopIdx, kF, Constants.kTimeoutMs);
+		m_motor1.config_kP(Constants.kPIDLoopIdx, kP, Constants.kTimeoutMs);
+		m_motor1.config_kI(Constants.kPIDLoopIdx, kI, Constants.kTimeoutMs);
+		m_motor1.config_kD(Constants.kPIDLoopIdx, kD, Constants.kTimeoutMs);
 	
-		double targetVelocity_UnitsPer100ms = m_velocity;// * 2048 / 600;  // Convert RPM to raw units per 100ms
+		// Convert RPM to raw units per 100ms
+		double targetVelocity_UnitsPer100ms = velocity;// * 2048 / 600;
 		
-		motor1.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
+		// Set m_Velocity setpoint
+		m_motor1.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
 		
-		int speed = motor1.getSelectedSensorVelocity();// * 600 / 2048; // Get speed and convert back to RPM
+		// Get current speed and convert back to RPM
+		int speed = m_motor1.getSelectedSensorVelocity();// * 600 / 2048;
 		SmartDashboard.putNumber("Current Velocity", speed);
 
-		SmartDashboard.putNumber("Error", motor1.getClosedLoopError());
+		// Show the current m_Error on the SDB
+		SmartDashboard.putNumber("Error", m_motor1.getClosedLoopError());
 	}
 }
