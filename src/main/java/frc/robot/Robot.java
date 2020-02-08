@@ -31,14 +31,19 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.can.*;
+import com.revrobotics.CANPIDController;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.ctre.phoenix.motorcontrol.*;
 
 public class Robot extends TimedRobot {
 
 	/* Hardware */
-	TalonFX m_motor1 = new TalonFX(1);
-	TalonFX m_motor2 = new TalonFX(2);
-    
+	CANSparkMax m_motor1 = new CANSparkMax(1, MotorType.kBrushless);
+	CANSparkMax m_motor2 = new CANSparkMax(2, MotorType.kBrushless);
+    CANPIDController PIDcontroller1 = new CANPIDController(m_motor1);
+    CANPIDController PIDcontroller2 = new CANPIDController(m_motor1);
+
     /* Initialize gains */
 	private double m_kP = 0.25, m_kI  = 0.0, m_kD = 0.0, m_kF = 0.045;
 
@@ -61,7 +66,8 @@ public class Robot extends TimedRobot {
 		/* Config sensor used for Primary PID [m_Velocity] */
         m_motor1.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor,
                                             Constants.kPIDLoopIdx, 
-                                            Constants.kTimeoutMs);
+											Constants.kTimeoutMs);
+		CANPIDController(m_motor1);
 		m_motor2.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor,
 											Constants.kPIDLoopIdx, 
 											Constants.kTimeoutMs);
@@ -99,6 +105,7 @@ public class Robot extends TimedRobot {
 		double kF = SmartDashboard.getNumber("Feed Forward",  0.045);
 
 		m_motor1.config_kF(Constants.kPIDLoopIdx, kF, Constants.kTimeoutMs);
+		m_motor1.setFF(kF);
 		m_motor1.config_kP(Constants.kPIDLoopIdx, kP, Constants.kTimeoutMs);
 		m_motor1.config_kI(Constants.kPIDLoopIdx, kI, Constants.kTimeoutMs);
 		m_motor1.config_kD(Constants.kPIDLoopIdx, kD, Constants.kTimeoutMs);
