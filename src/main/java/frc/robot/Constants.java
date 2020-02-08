@@ -4,23 +4,20 @@
 package frc.robot;
 
 class Constants {
-	/**
-	 * Which PID slot to pull gains from. Starting 2018, you can choose from
-	 * 0,1,2 or 3. Only the first two (0,1) are visible in web-based
-	 * configuration.
-	 */
-	public static final int kSlotIdx = 0;
+
+    /**
+     * Specify if shooter motors are Falcons. If not, we assume they are NEOs
+     */
+    public static final boolean useFalcons = false;
 
 	/**
-	 * Talon SRX/ Victor SPX will supported multiple (cascaded) PID loops. For
-	 * now we just want the primary one.
-	 */
-	public static final int kPIDLoopIdx = 0;
+	 * Default Falcon PIDF Gains
+	 * 	                                    			 kP    kI   kD   kF    Iz  PeakOut */
+    public final static Gains kGains_Falcon = new Gains( 0.25, 0.0, 0.0, 0.045, 0,  1.00);
 
 	/**
-	 * Set to zero to skip waiting for confirmation, set to nonzero to wait and
-	 * report to DS if action fails.
-	 */
-    public static final int kTimeoutMs = 30;
+	 * Default NEO PIDF Gains
+	 * 	                                    		  kP       kI   kD   kF     Iz  PeakOut */
+    public final static Gains kGains_NEO = new Gains( 0.00055, 0.0, 0.0, 0.0002, 0,  1.00);
 
 }
